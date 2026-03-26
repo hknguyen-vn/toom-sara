@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toom Sara: Một ngày để kết nối</title>
+    <title>28.03 Toom Sara: Về làng, đón mây làng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -141,7 +141,50 @@
                 animation: none;
             }
         }
+
+        /* Photo Slider / Marquee */
+        .marquee-container {
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .marquee-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .marquee-container:active {
+            cursor: grabbing;
+        }
+
+        .marquee-content {
+            will-change: transform;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            width: max-content;
+        }
+
+        .slider-item {
+            width: 320px;
+            pointer-events: none;
+            /* Prevent text selection or image drag while scrolling */
+        }
+
+        @media (min-width: 768px) {
+            .slider-item {
+                width: 480px;
+            }
+        }
+
+        .glass-overlay {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+            backdrop-filter: blur(2px);
+        }
     </style>
+
 </head>
 
 <body class="bg-slate-50 text-slate-900 font-['Inter'] selection:bg-emerald-100 overflow-x-hidden">
@@ -524,7 +567,7 @@
                         <p class="text-slate-600 font-light leading-relaxed">
                             Mặc <span
                                 class="font-bold text-red-600 underline decoration-red-200 underline-offset-4 decoration-2">Áo
-                                đỏ đồng phục</span> để tạo khung hình tập thể rạng rỡ nhất.
+                                đỏ đồng phục</span> để ghi hình tập thể rạng rỡ nhất.
                         </p>
                     </div>
                     <div
@@ -543,7 +586,7 @@
         </div>
     </section>
 
-    <!-- ═══════════ POST-TRIP GALLERY ═══════════ -->
+    <!-- ═══════════ POST-TRIP GALLERY ═══════════
     <section class="py-32 bg-slate-50">
         <div class="max-w-6xl mx-auto px-6 text-center">
             <h2 class="text-4xl md:text-5xl font-black mb-6 text-slate-800 reveal" style="font-family:var(--font-vn)">
@@ -589,7 +632,7 @@
                     viết tiếp...</p>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- ═══════════ FOOTER ═══════════ -->
     <footer class="py-16 border-t border-slate-100 bg-white">
@@ -618,7 +661,60 @@
             els.forEach(el => obs.observe(el));
         });
 
+        // Photo Slider Drag & Scroll Logic
+        const slider = document.getElementById('photo-slider');
+        const container = slider.parentElement;
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let velocity = 0;
+        let animationID;
+
+        const startDragging = (e) => {
+            isDown = true;
+            container.classList.add('active');
+            startX = (e.pageX || e.touches[0].pageX) - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+            cancelAnimationFrame(animationID);
+        };
+
+        const stopDragging = () => {
+            isDown = false;
+            container.classList.remove('active');
+            applyMomentum();
+        };
+
+        const moveDragging = (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = (e.pageX || e.touches[0].pageX) - container.offsetLeft;
+            const walk = (x - startX) * 1.5; // Scroll speed
+            const prevScrollLeft = container.scrollLeft;
+            container.scrollLeft = scrollLeft - walk;
+            velocity = container.scrollLeft - prevScrollLeft;
+        };
+
+        const applyMomentum = () => {
+            if (Math.abs(velocity) > 0.5) {
+                container.scrollLeft += velocity;
+                velocity *= 0.95; // Friction
+                animationID = requestAnimationFrame(applyMomentum);
+            }
+        };
+
+        container.addEventListener('mousedown', startDragging);
+        container.addEventListener('touchstart', startDragging, { passive: true });
+
+        window.addEventListener('mouseup', stopDragging);
+        window.addEventListener('touchend', stopDragging);
+
+        container.addEventListener('mousemove', moveDragging);
+        container.addEventListener('touchmove', moveDragging, { passive: false });
+
+        // Auto-loop for marquee effect (optional) - but here focusing on interaction
+        // Ensure standard scroll functionality works if needed but here we override for custom feel
     </script>
+
 </body>
 
 </html>
